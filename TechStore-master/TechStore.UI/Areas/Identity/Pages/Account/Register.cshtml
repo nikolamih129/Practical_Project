@@ -1,0 +1,35 @@
+﻿@page
+@model TechStore.UI.Areas.Identity.Pages.Account.RegisterModel
+@{
+      ViewData["Title"] = "Register";
+}
+
+<center>
+    <div class="register-container">
+        <form id="account" method="post">
+            <h4>Register</h4>
+            <hr />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-floating" style="margin:10px">
+                <input asp-for="Input.Email" class="form-control" autocomplete="username" area-required="true" />
+                <label asp-for="Input.Email" class="form-label"></label>
+                <span asp-validation-for="Input.Email" class="text-danger"></span>
+            </div>
+            <div class="form-floating" style="margin:10px">
+                <input asp-for="Input.Password" class="form-control" autocomplete="current-password" area-required="true" />
+                <label asp-for="Input.Password" class="form-label"></label>
+                <span asp-validation-for="Input.Password" class="text-danger"></span>
+            </div>
+
+            <div class="form-floating" style="margin:10px">
+                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="current-password" area-required="true" />
+                <label asp-for="Input.ConfirmPassword" class="form-label"></label>
+                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+            </div>
+
+            <div style="margin:10px">
+                <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+            </div>
+        </form>
+    </div>
+</center>

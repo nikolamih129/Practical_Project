@@ -1,0 +1,75 @@
+﻿@page "/product/delete/{productId:int}"
+@using TechStore.UI.Interfaces
+@using TechStore.UI.Models
+
+@inject  IProduct productsProvider
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete product</PageTitle>
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+
+<h2>Delete Product</h2>
+<br />
+<div class="form-group">
+    <h4>Do you want to delete this product?</h4>
+    <table class="table">
+        <tbody>
+            <tr>
+                <td>Make</td>
+                <td>@product.Make</td>
+            </tr>
+            <tr>
+                <td>Model</td>
+                <td>@product.Model</td>
+            </tr>
+            
+            <tr>
+                <!--<td>Image</td>-->
+                <!--<td>@product.ImageUrl</td>-->
+            </tr>
+            
+            <tr>
+                <td>Characteristics</td>
+                <td>@product.Characteristics</td>
+            </tr>
+            <tr>
+                <td>Description</td>
+                <td>@product.Description</td>
+            </tr>
+            <tr>
+                <td>Price</td>
+                <td>@product.Price</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="form-group">
+    <input type="submit" value="Delete" @onclick="(async () => await RemoveProduct(product.ProductId))" class="btn btn-danger" />
+    <input type="submit" value="Cancel" @onclick="(() => Cancel())" class="btn btn-warning" />
+</div>
+
+ </Authorized>
+    <NotAuthorized>
+        <center><h1>You are not admin.</h1></center>
+    </NotAuthorized>
+</AuthorizeView>
+@code {
+    [Parameter]
+    public int productId { get; set; }
+    Product product = new Product();
+    protected override async Task OnInitializedAsync()
+    {
+        product = productsProvider.GetProductData(productId);
+    }
+    protected async Task RemoveProduct(int productId)
+    {
+        productsProvider.DeleteProduct(productId);
+        NavigationManager.NavigateTo("/fetchproductdetails");
+    }
+    void Cancel()
+    {
+        NavigationManager.NavigateTo("/fetchproductdetails");
+    }
+}

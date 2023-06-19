@@ -1,0 +1,123 @@
+﻿@page "/fetchproductdetails"
+@using TechStore.UI.Interfaces
+@using TechStore.UI.Models
+
+@inject IProduct productsProvider
+
+<PageTitle>Admin</PageTitle>
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+<h3>Product Data</h3>
+<p>All products in invertory</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <a href='/product/add' class="btn btn-primary" role="button">
+            <i class="oi oi-bi bi-plus-circle"></i>
+            Add Product
+        </a>
+    </div>
+    <div class="input-group col">
+        <input type="text" class="form-control" placeholder="Search product by make"
+               @bind="SearchString" @bind:event="oninput" @onkeyup="FilterProduct" />
+        @if (SearchString.Length > 0)
+        {
+            <div class="input-group-append">
+                <button class="btn btn-danger" @onclick="ResetSearch">
+                    <i class="oi oi-bi bi-search"></i>
+                </button>
+            </div>
+        }
+    </div>
+</div>
+<br />
+@if (productList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-striped align-middle table-bordered">
+        <thead class="table-success">
+            <tr>
+                <th>ID</th>
+                <th>Make</th>
+                <th>Model</th>
+                <!--<th>Image</th>-->
+                <th>Characteristics</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Edit/Delete product</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in productList)
+            {
+                <tr>
+                    <td>@product.ProductId</td>
+                    <td>@product.Make</td>
+                    <td>@product.Model</td>
+                    <!--<td>@product.ImageUrl</td>-->
+                    <td>@product.Characteristics</td>
+                    <td>@product.Description</td>
+                    <td>@product.Price</td>
+                    <td>
+                        <a href='/product/edit/@product.ProductId' class="btn btn-outline-dark" role="button">
+                            Edit
+                        </a>
+                        <a href='/product/delete/@product.ProductId' class="btn btn-outline-danger" role="button">
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+
+    </table>
+}
+
+   </Authorized>
+    <NotAuthorized>
+        <center><h1>You are not admin.</h1></center>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    protected List<Product> productList = new();
+    protected List<Product> searchProductData = new();
+    protected Product product = new();
+    protected string SearchString { get; set; } = string.Empty;
+    protected override async Task OnInitializedAsync()
+    {
+        await GetProduct();
+    }
+    protected async Task GetProduct()
+    {
+        
+        productList = productsProvider.GetProductDetails();
+        searchProductData = productList;
+    }
+    protected void FilterProduct()
+    {
+        if (!string.IsNullOrEmpty(SearchString))
+        {
+            productList = searchProductData
+                .Where(x => x.Make.IndexOf(SearchString, StringComparison.OrdinalIgnoreCase) != -1)
+                .ToList();
+        }
+        else
+        {
+            productList = searchProductData;
+        }
+    }
+    protected void DeleteConfirm(int productID)
+    {
+        product = productList.FirstOrDefault(x => x.ProductId == productID);
+    }
+    public void ResetSearch()
+    {
+        SearchString = string.Empty;
+        productList = searchProductData;
+    }
+}

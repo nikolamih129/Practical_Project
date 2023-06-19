@@ -1,0 +1,22 @@
+﻿@inherits LayoutComponentBase
+
+<PageTitle>TechStore.UI</PageTitle>
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+         <div class="top-row px-4">
+             <a href="/identity/account/register">Register</a>
+             <a href="/identity/account/login">Login</a>
+             <a href="/identity/account/logout">Log out</a>
+             <a href="cart">Cart</a>
+        </div>
+       
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>

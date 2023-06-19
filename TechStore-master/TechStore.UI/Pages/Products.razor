@@ -1,0 +1,100 @@
+﻿@page "/products"
+@using TechStore.UI.Interfaces
+@using TechStore.UI.Models
+
+@inject  IProduct productsProvider
+
+<PageTitle>Tech Products</PageTitle>
+
+<AuthorizeView Roles="Admin,User">
+    <Authorized>
+
+<h3>Choose from out available tech products</h3>
+<div class="row">
+    <div class="input-group col">
+        <input type="text" class="form-control" placeholder="Search product by make"
+               @bind="SearchString" @bind:event="oninput" @onkeyup="FilterProduct" />
+        @if (SearchString.Length > 0)
+        {
+            <div class="input-group-append">
+                <button class="btn btn-danger" @onclick="ResetSearch">
+                    <i class="oi oi-bi bi-search"></i>
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+<br />
+@if (productList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    @foreach (var product in productList)
+    {
+        <div class="container">
+            <div class="row">
+                <div class="col-sm">
+                    <div class="text-left">
+                        <img src="/image/laptop.png" alt="" width="300" height="300">
+                    </div>
+                </div>
+                <div class="col-sm">
+                    <label>@product.Make</label>
+                    <label>@product.Model</label>
+                    <br>
+                    <label>@product.Characteristics</label>
+                    <br>
+                    <label>@product.Description</label>
+                    <br>
+                    <label>@product.Price</label>
+                </div>
+                <div class="col-sm">
+                    <button type="submit" class="btn btn-danger">Add to cart</button>
+                </div>
+            </div>
+        </div>
+        <br />
+    }
+}
+   </Authorized>
+    <NotAuthorized>
+        <center><h3>Please Login or Register to see our products.</h3></center>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    protected List<Product> productList = new();
+    protected List<Product> searchProductData = new();
+    protected Product product = new();
+    protected string SearchString { get; set; } = string.Empty;
+    protected override async Task OnInitializedAsync()
+    {
+        await GetProduct();
+    }
+    protected async Task GetProduct()
+    {
+        productList = productsProvider.GetProductDetails();
+        searchProductData = productList;
+    }
+    protected void FilterProduct()
+    {
+        if (!string.IsNullOrEmpty(SearchString))
+        {
+            productList = searchProductData
+                .Where(x => x.Make.IndexOf(SearchString, StringComparison.OrdinalIgnoreCase) != -1)
+                .ToList();
+        }
+        else
+        {
+            productList = searchProductData;
+        }
+    }
+    public void ResetSearch()
+    {
+        SearchString = string.Empty;
+        productList = searchProductData;
+    }
+}

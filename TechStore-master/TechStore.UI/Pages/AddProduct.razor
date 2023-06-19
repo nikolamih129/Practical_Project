@@ -1,0 +1,153 @@
+﻿@page "/product/add"
+@page "/product/edit/{ProductId:int}"
+
+@using System.ComponentModel.DataAnnotations
+@using TechStore.UI.Interfaces
+@using TechStore.UI.Models
+
+@inject IProduct productsProvider
+@inject NavigationManager NavigationManager
+
+<PageTitle>Add product</PageTitle>
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+
+<h1>@Title Product</h1>
+<hr />
+<EditForm Model="@product" OnValidSubmit="SaveProduct" Context="context2">
+    <DataAnnotationsValidator />
+    
+    <!--
+    <div class="mb-3">
+        <label for="Upload Image" class="form-label">Image</label>
+        <div class="col-md-4">
+            <InputFile OnChange="OnInputFileChange" multiple @bind-Value="product.ImageUrl" />
+        </div>
+        <ValidationMessage For="@(() => product.ImageUrl)" />
+    </div>
+
+    @if (imageDataUrls != null && imageDataUrls.Count > 0)
+    {
+        <div class="col-12 image-list">
+            @foreach (var img in imageDataUrls)
+            {
+                <div style="border:1px solid #000000; float:left; margin:2px;">
+                    <img src="img" width="150" height="150" />
+                </div>
+            }
+        </div>
+    }
+    -->
+    <div class="mb-3">
+        <label for="Make" class="form-label">Make</label>
+        <div class="col-md-4">
+            <InputText class="form-control" @bind-Value="product.Make" />
+        </div>
+        <ValidationMessage For="@(() => product.Make)" />
+    </div>
+    <div class="mb-3">
+        <label for="Model" class="form-label">Model</label>
+        <div class="col-md-4">
+            <InputText class="form-control" @bind-Value="product.Model" />
+        </div>
+        <ValidationMessage For="@(() => product.Model)" />
+    </div>
+    <div class="mb-3">
+        <label for="Characteristics" class="form-label">Characteristics</label>
+        <div class="col-md-4">
+            <InputText class="form-control" @bind-Value="product.Characteristics" />
+        </div>
+        <ValidationMessage For="@(() => product.Characteristics)" />
+    </div>
+    <div class="mb-3">
+        <label for="Description" class="form-label">Description</label>
+        <div class="col-md-4">
+            <InputText class="form-control" @bind-Value="product.Description" />
+        </div>
+        <ValidationMessage For="@(() => product.Description)" />
+    </div>
+    <div class="mb-3">
+        <label for="Price" class="form-label">Price</label>
+        <div class="col-md-4">
+            <InputText class="form-control" @bind-Value="product.Price" />
+        </div>
+        <ValidationMessage For="@(() => product.Price)" />
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Add product to invertory</button>
+        <button class="btn btn-light" @onclick="Cancel"><a href="fetchproductdetails">Cancel</a></button>
+    </div>
+</EditForm>        
+    </Authorized>
+    <NotAuthorized>
+        <p>You are not admin.</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    IList<string> imageDataUrls = new List<string>();
+
+    [Parameter]
+    public int ProductId { get; set; }
+    protected string Title = "Add";
+    protected Product product = new();
+    protected override async Task OnParametersSetAsync()
+    {
+        if (ProductId != 0)
+        {
+            Title = "Edit";
+            product = productsProvider.GetProductData(ProductId);
+        }
+    }
+    protected async Task SaveProduct()
+    {
+        if (product.ProductId != 0)
+        {
+            productsProvider.UpdateProductDetails(product);
+        }
+        else
+        {
+            productsProvider.AddProduct(product);
+        }
+        Cancel();
+    }
+    public void Cancel()
+    {
+        NavigationManager.NavigateTo("/fetchproductdetails");
+    }
+
+    async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        var imageFiles = e.GetMultipleFiles();
+        var format = "image/png";
+        foreach(var img in imageFiles)
+        {
+            var imageInfo = new Product();
+            var resizedImageFile = await img.RequestImageFileAsync(format, 100, 100);
+            //var buffer = new string(resizedImageFile.Size); 
+
+            var buffer = new byte[resizedImageFile.Size];
+
+            await resizedImageFile.OpenReadStream().ReadAsync(buffer);
+            var imgUrl = $"data:{format};base64,{Convert.ToBase64String(buffer)}";
+
+            imageDataUrls.Add(imgUrl);
+            //imageInfo.ImageName = img.Name;
+            //imageInfo.Image = buffer;
+
+        }
+    }
+    /*
+    public async Task GetUploadFiles()
+    {
+        var format = "image/png";
+        foreach(var image in imageDataUrls)
+        {
+            var imgUrl = $"data:{format};base64,{Convert.ToBase64String(image.Image)}";
+            imageDataUrls.Add(imgUrl);
+
+        }
+    }
+    */
+}
